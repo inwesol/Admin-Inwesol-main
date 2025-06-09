@@ -1,9 +1,5 @@
-export default function Home() {
-  return (
-    <section className='py-24'>
-      <div className='container'>
-        <h1 className='text-3xl font-bold'>Hello Admin</h1>
-      </div>
-    </section>
-  )
+import { redirect } from 'next/navigation'
+
+export default function HomePage() {
+  redirect('/partner-dashboard')
 }

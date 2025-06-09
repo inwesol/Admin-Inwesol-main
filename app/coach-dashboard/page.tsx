@@ -13,7 +13,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import PeopleListManager from "@/components/PeopleListManager"
+import PeopleListManager from "@/components/PeopleListManager-coach"
 
 export default function Page() {
   return (
@@ -27,7 +27,7 @@ export default function Page() {
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
                   <BreadcrumbLink href="#">
-                     Admin Portal
+                    Admin Portal
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
