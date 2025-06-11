@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { AppSidebar } from '@/components/app-sidebar'
-import { SidebarProvider } from '@/components/ui/sidebar'
+import { ClerkProvider } from '@clerk/nextjs'
+import { ConditionalLayout } from '@/components/conditional-layout'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -17,13 +17,16 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <SidebarProvider>
-          <AppSidebar />
-          {children}
-        </SidebarProvider>
-      </body>
-    </html>
+    <ClerkProvider
+      publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+    >
+      <html lang="en">
+        <body className={inter.className}>
+          <ConditionalLayout>
+            {children}
+          </ConditionalLayout>
+        </body>
+      </html>
+    </ClerkProvider>
   )
 }
