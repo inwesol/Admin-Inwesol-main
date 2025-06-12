@@ -6,6 +6,7 @@ import {
   Frame,
   Map,
   PieChart,
+  LucideIcon,
 } from "lucide-react"
 
 import { NavProjects } from "@/components/nav-projects"
@@ -20,7 +21,17 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-const data = {
+// Define the project type
+interface Project {
+  name: string;
+  url: string;
+  icon: LucideIcon;
+}
+
+// Define the data structure
+const data: {
+  projects: Project[];
+} = {
   projects: [
     {
       name: "Partner-Dashboard",
@@ -32,13 +43,19 @@ const data = {
       url: "/coach-dashboard",
       icon: Frame,
     },
-    
   ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+// Define the component props interface
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {}
+
+export function AppSidebar({ ...props }: AppSidebarProps) {
   return (
-    <Sidebar variant="inset" {...props}>
+    <Sidebar 
+      variant="inset" 
+      collapsible="icon"
+      {...props}
+    >
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>

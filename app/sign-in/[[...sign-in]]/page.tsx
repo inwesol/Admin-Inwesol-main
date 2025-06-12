@@ -1,11 +1,13 @@
 "use client"
+
 import { SignIn } from '@clerk/nextjs'
 import { useUser } from '@clerk/nextjs'
 import { useState, useEffect } from 'react'
+import type { FC } from 'react'
 
-export default function LoginPage() {
+const LoginPage: FC = () => {
   const { isLoaded } = useUser()
-  const [showPlaceholder, setShowPlaceholder] = useState(true)
+  const [showPlaceholder, setShowPlaceholder] = useState<boolean>(true)
   
   useEffect(() => {
     if (isLoaded) {
@@ -46,14 +48,14 @@ export default function LoginPage() {
           {showPlaceholder && (
             <div className="space-y-4 animate-pulse">
               <div className="space-y-2">
-                <div className="h-4 bg-gray-200 rounded w-24"></div>
-                <div className="h-10 bg-gray-200 rounded"></div>
+                <div className="h-4 bg-gray-200 rounded w-24" />
+                <div className="h-10 bg-gray-200 rounded" />
               </div>
               <div className="space-y-2">
-                <div className="h-4 bg-gray-200 rounded w-20"></div>
-                <div className="h-10 bg-gray-200 rounded"></div>
+                <div className="h-4 bg-gray-200 rounded w-20" />
+                <div className="h-10 bg-gray-200 rounded" />
               </div>
-              <div className="h-10 bg-[#00B24B] rounded"></div>
+              <div className="h-10 bg-[#00B24B] rounded" />
             </div>
           )}
           
@@ -98,3 +100,5 @@ export default function LoginPage() {
     </div>
   )
 }
+
+export default LoginPage

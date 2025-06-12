@@ -1,9 +1,15 @@
 'use client'
+
+import React from 'react'
 import { useUser } from '@clerk/nextjs'
 import { AppSidebar } from '@/components/app-sidebar'
-import { SidebarProvider } from '@/components/ui/sidebar'
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar'
 
-function SidebarSkeleton() {
+interface LayoutProps {
+  children: React.ReactNode
+}
+
+function SidebarSkeleton(): JSX.Element {
   return (
     <div className="flex h-full w-64 flex-col border-r bg-background">
       <div className="flex h-16 items-center border-b px-4">
@@ -21,25 +27,37 @@ function SidebarSkeleton() {
   )
 }
 
-export function ConditionalLayout({ children }: { children: React.ReactNode }) {
+function SidebarLayout({ children }: LayoutProps): JSX.Element {
+  return (
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        {children}
+      </SidebarInset>
+    </SidebarProvider>
+  )
+}
+
+export function ConditionalLayout({ children }: LayoutProps): JSX.Element {
   const { isSignedIn, isLoaded } = useUser()
   
-  // If user is not loaded yet or not signed in, render children without sidebar layout
-  if (!isLoaded || !isSignedIn) {
+  // Show loading skeleton while checking auth
+  if (!isLoaded) {
+    return (
+      <div className="flex h-screen">
+        <SidebarSkeleton />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="animate-pulse text-muted-foreground">Loading...</div>
+        </div>
+      </div>
+    )
+  }
+  
+  // If user is not signed in, render children without sidebar layout
+  if (!isSignedIn) {
     return <>{children}</>
   }
   
-  // If user is signed in, wrap with SidebarProvider and show sidebar
-  return (
-    <SidebarProvider>
-      <div className="flex h-screen w-full">
-        <div className="border-r border-gray-200 shadow-sm">
-          <AppSidebar />
-        </div>
-        <main className="flex-1 overflow-auto">
-          {children}
-        </main>
-      </div>
-    </SidebarProvider>
-  )
+  // If user is signed in, use the sidebar layout
+  return <SidebarLayout>{children}</SidebarLayout>
 }
