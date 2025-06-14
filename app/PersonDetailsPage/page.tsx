@@ -138,9 +138,18 @@ export default function PersonDetailsPage({ params }: PersonDetailsPageProps) {
   // Get the person ID from the URL parameters
   const personId = params?.id;
   
+  // Check if localStorage is available (client-side)
+  const isLocalStorageAvailable = (): boolean => {
+    try {
+      return typeof window !== 'undefined' && 'localStorage' in window;
+    } catch {
+      return false;
+    }
+  };
+  
   // Get user-specific localStorage key
   const getUserStorageKey = (): string | null => {
-    if (!user?.id) return null;
+    if (!user?.id || !isLocalStorageAvailable()) return null;
     return `peopleData_${user.id}`;
   };
   
@@ -149,7 +158,7 @@ export default function PersonDetailsPage({ params }: PersonDetailsPageProps) {
     const loadPersonData = () => {
       setLoading(true);
       try {
-        if (user?.id) {
+        if (user?.id && isLocalStorageAvailable()) {
           const storageKey = getUserStorageKey();
           if (storageKey) {
             const storedPeople = localStorage.getItem(storageKey);
@@ -193,7 +202,7 @@ export default function PersonDetailsPage({ params }: PersonDetailsPageProps) {
   
   // Function to handle saving edits
   const handleSaveEdit = () => {
-    if (!editingPerson || !user?.id) return;
+    if (!editingPerson || !user?.id || !isLocalStorageAvailable()) return;
     
     try {
       const storageKey = getUserStorageKey();
@@ -375,7 +384,7 @@ export default function PersonDetailsPage({ params }: PersonDetailsPageProps) {
   
   // Hide empty categories
   const nonEmptyCategories = Object.entries(categorizedData)
-    .filter(([_, values]) => Object.keys(values).length > 0)
+    .filter(([, values]) => Object.keys(values).length > 0)
     .map(([category]) => category);
   
   const getCategoryLabel = (category: string): string => {

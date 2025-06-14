@@ -59,7 +59,7 @@ interface CategorizedData {
 
 // Extended Breadcrumb component
 const ExtendedBreadcrumb = ({ coach, onDashboardClick }: ExtendedBreadcrumbProps) => (
-  <div className=" px-4 py-3">
+  <div className="px-4 py-3">
     <div className="max-w-7xl mx-auto">
       <nav className="flex items-center space-x-2 text-sm">
         <button 
@@ -370,7 +370,7 @@ export default function CoachDetailsPage({ params }: CoachDetailsPageProps) {
   
   // Hide empty categories
   const nonEmptyCategories = Object.entries(categorizedData)
-    .filter(([_, values]) => Object.keys(values).length > 0)
+    .filter(([, values]) => Object.keys(values).length > 0)
     .map(([category]) => category);
   
   const getCategoryLabel = (category: string): string => {

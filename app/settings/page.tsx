@@ -3,6 +3,43 @@ import { useState, useCallback } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { Eye, EyeOff, Lock, CheckCircle, XCircle, Shield } from 'lucide-react'
 
+// Define proper TypeScript interfaces
+interface PasswordInputProps {
+  label: string
+  value: string
+  onChange: (value: string) => void
+  show: boolean
+  onToggle: () => void
+  placeholder: string
+}
+
+interface MessageState {
+  type: 'success' | 'error'
+  text: string
+}
+
+interface PasswordsState {
+  currentPassword: string
+  newPassword: string
+  confirmPassword: string
+}
+
+interface ShowPasswordsState {
+  current: boolean
+  new: boolean
+  confirm: boolean
+}
+
+// Define error interface for Clerk API errors
+interface ClerkError {
+  errors?: Array<{
+    code?: string
+    longMessage?: string
+    message?: string
+  }>
+  message?: string
+}
+
 // Memoized PasswordInput component to prevent unnecessary re-renders
 const PasswordInput = ({ 
   label, 
@@ -11,14 +48,7 @@ const PasswordInput = ({
   show, 
   onToggle, 
   placeholder 
-}: {
-  label: string
-  value: string
-  onChange: (value: string) => void
-  show: boolean
-  onToggle: () => void
-  placeholder: string
-}) => (
+}: PasswordInputProps) => (
   <div className="space-y-3">
     <label className="block text-sm font-semibold text-gray-800">
       {label}
@@ -37,6 +67,7 @@ const PasswordInput = ({
         type="button"
         onClick={onToggle}
         className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-[#00B24B] transition-colors duration-200 p-1"
+        aria-label={show ? "Hide password" : "Show password"}
       >
         {show ? <EyeOff size={22} /> : <Eye size={22} />}
       </button>
@@ -46,21 +77,21 @@ const PasswordInput = ({
 
 export default function SettingsPage() {
   const { user } = useUser()
-  const [passwords, setPasswords] = useState({
+  const [passwords, setPasswords] = useState<PasswordsState>({
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   })
-  const [showPasswords, setShowPasswords] = useState({
+  const [showPasswords, setShowPasswords] = useState<ShowPasswordsState>({
     current: false,
     new: false,
     confirm: false
   })
-  const [isLoading, setIsLoading] = useState(false)
-  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [message, setMessage] = useState<MessageState | null>(null)
 
   // Use useCallback to prevent function recreation on every render
-  const handleInputChange = useCallback((field: string, value: string) => {
+  const handleInputChange = useCallback((field: keyof PasswordsState, value: string) => {
     setPasswords(prev => ({
       ...prev,
       [field]: value
@@ -69,14 +100,14 @@ export default function SettingsPage() {
     if (message) setMessage(null)
   }, [message])
 
-  const togglePasswordVisibility = useCallback((field: 'current' | 'new' | 'confirm') => {
+  const togglePasswordVisibility = useCallback((field: keyof ShowPasswordsState) => {
     setShowPasswords(prev => ({
       ...prev,
       [field]: !prev[field]
     }))
   }, [])
 
-  const validatePasswords = useCallback(() => {
+  const validatePasswords = useCallback((): boolean => {
     if (!passwords.currentPassword || passwords.currentPassword.length < 3) {
       setMessage({ type: 'error', text: 'Please enter your complete current password' })
       return false
@@ -100,7 +131,7 @@ export default function SettingsPage() {
     return true
   }, [passwords])
 
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = useCallback(async (): Promise<void> => {
     if (!validatePasswords()) return
     
     setIsLoading(true)
@@ -122,24 +153,30 @@ export default function SettingsPage() {
         newPassword: '',
         confirmPassword: ''
       })
-    } catch (error: any) {
+    } catch (error) {
       console.error('Password update error:', error)
       
-      if (error?.errors?.[0]?.code === 'form_password_incorrect') {
+      const clerkError = error as ClerkError
+      
+      if (clerkError?.errors?.[0]?.code === 'form_password_incorrect') {
         setMessage({ type: 'error', text: 'Current password is incorrect' })
-      } else if (error?.errors?.[0]?.code === 'form_password_pwned') {
+      } else if (clerkError?.errors?.[0]?.code === 'form_password_pwned') {
         setMessage({ type: 'error', text: 'This password has been found in a data breach. Please choose a different password.' })
-      } else if (error?.errors?.[0]?.code === 'form_password_too_common') {
+      } else if (clerkError?.errors?.[0]?.code === 'form_password_too_common') {
         setMessage({ type: 'error', text: 'This password is too common. Please choose a stronger password.' })
       } else {
+        const errorMessage = clerkError?.errors?.[0]?.message || 
+                           clerkError?.errors?.[0]?.longMessage || 
+                           clerkError?.message ||
+                           'Failed to update password. Please check your current password and try again.'
         setMessage({ 
           type: 'error', 
-          text: error?.errors?.[0]?.message || 'Failed to update password. Please check your current password and try again.' 
+          text: errorMessage
         })
       }
+    } finally {
+      setIsLoading(false)
     }
-    
-    setIsLoading(false)
   }, [validatePasswords, user, passwords])
 
   return (

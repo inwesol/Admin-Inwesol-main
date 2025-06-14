@@ -1,8 +1,9 @@
 "use client"
 import { useState } from 'react'
 import { useSignIn } from '@clerk/nextjs'
-import { Zap, ArrowLeft } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -11,7 +12,7 @@ export default function ForgotPasswordPage() {
   const [isSuccess, setIsSuccess] = useState(false)
   const { signIn } = useSignIn()
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!email) return
     
@@ -19,14 +20,21 @@ export default function ForgotPasswordPage() {
     setMessage('')
     
     try {
-      await signIn?.create({
+      if (!signIn) {
+        throw new Error('Sign in not available')
+      }
+      
+      await signIn.create({
         strategy: 'reset_password_email_code',
         identifier: email,
       })
       setIsSuccess(true)
       setMessage('Password reset email sent! Check your inbox and follow the instructions.')
-    } catch (error: any) {
-      setMessage(error?.errors?.[0]?.message || 'Error sending reset email. Please try again.')
+    } catch (error) {
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : (error as any)?.errors?.[0]?.message || 'Error sending reset email. Please try again.'
+      setMessage(errorMessage)
     }
     
     setIsLoading(false)
@@ -40,10 +48,13 @@ export default function ForgotPasswordPage() {
         
         {/* Illustration */}
         <div className="relative z-10 mb-8 w-full max-w-md">
-          <img 
+          <Image 
             src="/forgot-password.svg" 
             alt="Forgot password illustration"
+            width={400}
+            height={300}
             className="w-full h-auto"
+            priority
           />
         </div>
         
