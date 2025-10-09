@@ -91,8 +91,8 @@ const LoginPage: FC = () => {
                 }
               }}
               signUpUrl=""
-              forceRedirectUrl="/partner-dashboard"
-              fallbackRedirectUrl="/partner-dashboard"
+              forceRedirectUrl="/Partner-Dashboard"
+              fallbackRedirectUrl="/Partner-Dashboard"
             />
           </div>
         </div>

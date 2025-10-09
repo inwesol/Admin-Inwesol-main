@@ -35,12 +35,17 @@ const data: {
   projects: [
     {
       name: "Partner-Dashboard",
-      url: "/partner-dashboard",
+      url: "/Partner-Dashboard",
       icon: Frame,
     },
     {
       name: "Coach-Dashboard",
       url: "/coach-dashboard",
+      icon: Frame,
+    },
+    {
+      name: "Mapping",
+      url: "/mapping",
       icon: Frame,
     },
   ],
