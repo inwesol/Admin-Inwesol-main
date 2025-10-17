@@ -115,7 +115,24 @@ export default function PeopleListManager() {
 
   // Load people data from user-specific localStorage on initial mount
   useEffect(() => {
-    if (isLoaded && user?.id) {
+    // Try to load from backend first, fall back to localStorage
+    async function load() {
+      if (!isLoaded || !user?.id) return
+      try {
+        const res = await fetch(`/api/people?userId=${user.id}`)
+        if (res.ok) {
+          const data = await res.json()
+          if (Array.isArray(data) && data.length > 0) {
+            // map db rows to Person[]
+            const mapped = data.map((r: any) => ({ id: r.id, name: r.name || r.data?.name || '', email: r.email || r.data?.email || '', role: r.role || r.data?.role || '', ...r.data }))
+            setPeople(mapped)
+            return
+          }
+        }
+      } catch (e) {
+        console.warn('Could not fetch people from API, falling back to localStorage', e)
+      }
+
       const storageKey = getUserStorageKey()
       if (storageKey) {
         const storedPeople = localStorage.getItem(storageKey)
@@ -128,6 +145,7 @@ export default function PeopleListManager() {
         }
       }
     }
+    load()
   }, [isLoaded, user?.id])
 
   // Clear data when user changes (additional safety measure)
@@ -333,8 +351,8 @@ export default function PeopleListManager() {
     const file = event.target.files?.[0]
     if (!file) return
 
-    const reader = new FileReader()
-    reader.onload = (e: ProgressEvent<FileReader>) => {
+  const reader = new FileReader()
+  reader.onload = async (e: ProgressEvent<FileReader>) => {
       try {
         if (!e.target?.result) return
         // Process Excel file using SheetJS
@@ -355,9 +373,18 @@ export default function PeopleListManager() {
             ...row // Keep any additional fields
           }
         })
-
-        // Add the imported people to the state
+        // Add the imported people to the state and persist to backend
         setPeople(current => [...importedPeople, ...current])
+        // attempt to persist to backend
+        try {
+          await fetch('/api/people', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: user?.id, people: importedPeople })
+          })
+        } catch (err) {
+          console.warn('Persist to backend failed, data kept in localStorage', err)
+        }
         // Clear the file input
         event.target.value = ''
       } catch (error) {
@@ -379,6 +406,8 @@ export default function PeopleListManager() {
 
     // Add new person at the top of the list
     setPeople([personWithId, ...people])
+    // persist
+    fetch('/api/people', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user?.id, people: [personWithId] }) }).catch(e=>console.warn('persist add failed', e))
     setNewPerson({ name: '', email: '', role: '' })
     setIsDialogOpen(false)
   }
@@ -386,6 +415,7 @@ export default function PeopleListManager() {
   // Function to handle deleting a person
   const handleDeletePerson = (id: number): void => {
     setPeople(people.filter(person => person.id !== id))
+    fetch(`/api/people?id=${id}&userId=${user?.id}`, { method: 'DELETE' }).catch(e=>console.warn('delete failed', e))
   }
 
   // Function to handle editing a person
@@ -409,6 +439,7 @@ export default function PeopleListManager() {
         person.id === editingPerson.id ? editingPerson : person
       )
     )
+    fetch('/api/people', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user?.id, person: editingPerson }) }).catch(e=>console.warn('update failed', e))
     setEditingPerson(null)
     setIsEditDialogOpen(false)
   }

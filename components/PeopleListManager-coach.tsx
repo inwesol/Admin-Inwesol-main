@@ -115,7 +115,23 @@ export default function CoachListManager() {
 
   // Load coaches data from user-specific localStorage on initial mount
   useEffect(() => {
-    if (isLoaded && user?.id) {
+    // Try to load from backend first, fall back to localStorage
+    async function load() {
+      if (!isLoaded || !user?.id) return
+      try {
+        const res = await fetch(`/api/coaches?userId=${user.id}`)
+        if (res.ok) {
+          const data = await res.json()
+          if (Array.isArray(data) && data.length > 0) {
+            const mapped = data.map((r: any) => ({ id: r.id, name: r.name || r.data?.name || '', email: r.email || r.data?.email || '', role: r.role || r.data?.role || '', ...r.data }))
+            setCoaches(mapped)
+            return
+          }
+        }
+      } catch (e) {
+        console.warn('Could not fetch coaches from API, falling back to localStorage', e)
+      }
+
       const storageKey = getUserStorageKey()
       if (storageKey) {
         const storedCoaches = localStorage.getItem(storageKey)
@@ -128,6 +144,7 @@ export default function CoachListManager() {
         }
       }
     }
+    load()
   }, [isLoaded, user?.id])
 
   // Clear data when user changes (additional safety measure)
@@ -337,8 +354,8 @@ export default function CoachListManager() {
     const file = event.target.files?.[0]
     if (!file) return
 
-    const reader = new FileReader()
-    reader.onload = (e: ProgressEvent<FileReader>) => {
+  const reader = new FileReader()
+  reader.onload = async (e: ProgressEvent<FileReader>) => {
       try {
         if (!e.target?.result) return
         // Process Excel file using SheetJS
@@ -359,9 +376,13 @@ export default function CoachListManager() {
             ...row // Keep any additional fields
           }
         })
-
-        // Add the imported coaches to the state
+        // Add the imported coaches to the state and persist to backend
         setCoaches(current => [...importedCoaches, ...current])
+        try {
+          await fetch('/api/coaches', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user?.id, coaches: importedCoaches }) })
+        } catch (err) {
+          console.warn('Persist to backend failed, data kept in localStorage', err)
+        }
         // Clear the file input
         event.target.value = ''
       } catch (error) {
@@ -383,6 +404,7 @@ export default function CoachListManager() {
 
     // Add new coach at the top of the list
     setCoaches([coachWithId, ...coaches])
+    fetch('/api/coaches', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user?.id, coaches: [coachWithId] }) }).catch(e=>console.warn('persist add failed', e))
     setNewCoach({ name: '', email: '', role: '' })
     setIsDialogOpen(false)
   }
@@ -390,6 +412,7 @@ export default function CoachListManager() {
   // Function to handle deleting a coach
   const handleDeleteCoach = (id: number): void => {
     setCoaches(coaches.filter(coach => coach.id !== id))
+    fetch(`/api/coaches?id=${id}&userId=${user?.id}`, { method: 'DELETE' }).catch(e=>console.warn('delete failed', e))
   }
 
   // Function to handle editing a coach
@@ -413,6 +436,7 @@ export default function CoachListManager() {
         coach.id === editingCoach.id ? editingCoach : coach
       )
     )
+    fetch('/api/coaches', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user?.id, coach: editingCoach }) }).catch(e=>console.warn('update failed', e))
     setEditingCoach(null)
     setIsEditDialogOpen(false)
   }
