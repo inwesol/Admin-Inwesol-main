@@ -492,7 +492,7 @@ export const coaches = pgTable("coaches", {
 	id: uuid().default(sql`uuid_generate_v4()`).primaryKey().notNull(),
 	name: text(),
 	email: text(),
-	clients: text(),
+	clients: text().array(),
 	sessionLinks: text("session_links"),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow(),

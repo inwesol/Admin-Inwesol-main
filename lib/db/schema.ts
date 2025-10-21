@@ -1,4 +1,5 @@
 import { pgTable, uuid, varchar, timestamp, boolean, unique, integer, json, jsonb, text } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 
 // User table schema from introspected database
 export const users = pgTable('User', {
@@ -42,13 +43,13 @@ export const userSessionFormProgress = pgTable('user_session_form_progress', {
 
 // Coaches table schema
 export const coaches = pgTable('coaches', {
-  id: uuid().defaultRandom().primaryKey().notNull(),
+  id: uuid().default(sql`uuid_generate_v4()`).primaryKey().notNull(),
   name: text(),
   email: text(),
   clients: text().array(),
   sessionLinks: text('session_links'),
-  createdAt: timestamp('created_at', { mode: 'string' }).defaultNow(),
-  updatedAt: timestamp('updated_at', { mode: 'string' }).defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }).defaultNow(),
 }, (table) => [
   unique('coaches_email_key').on(table.email),
 ]);
