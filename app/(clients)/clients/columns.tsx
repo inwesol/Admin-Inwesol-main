@@ -47,18 +47,17 @@ export const createColumns = (
     header: 'Client',
     cell: ({ row }) => {
       const name = row.getValue('name') as string
-      const email = row.getValue('email') as string
       const hasPending = row.getValue('hasPendingScheduleCall') as boolean
 
-      // Alternative way to access email data
-      const emailFromOriginal = (row.original as any)?.email
+      // Get email from the original data object
+      const email = (row.original as any)?.email
 
       return (
         <div className='flex flex-col gap-1'>
           <div className='font-medium'>{name || 'N/A'}</div>
           <div className='flex items-center gap-2'>
             <span className='text-sm text-muted-foreground'>
-              {email || emailFromOriginal || 'N/A'}
+              {email || 'N/A'}
             </span>
             {hasPending && (
               <Badge variant='pending' className='text-xs'>

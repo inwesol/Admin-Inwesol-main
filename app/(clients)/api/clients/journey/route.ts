@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
         hasPendingScheduleCall: sql<boolean>`CASE WHEN ${userSessionFormProgress.formId} = 'schedule-call' AND ${userSessionFormProgress.status} = 'pending' THEN true ELSE false END`,
         sessionDatetime: sql<string | null>`CASE WHEN ${userSessionFormProgress.formId} = 'schedule-call' AND ${userSessionFormProgress.status} = 'pending' THEN ${userSessionFormProgress.insights}->>'session_datetime' ELSE NULL END`,
         formStatus: userSessionFormProgress.status,
+        assignedCoachId: sql<string | null>`CASE WHEN ${userSessionFormProgress.insights}->>'assignedCoachId' IS NOT NULL THEN ${userSessionFormProgress.insights}->>'assignedCoachId' ELSE NULL END`,
       })
       .from(users)
       .innerJoin(journeyProgress, eq(users.id, journeyProgress.userId))
