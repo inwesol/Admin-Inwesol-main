@@ -46,8 +46,10 @@ export function EditableSessionDatetime({
 
       const response = await fetch('/api/clients/session-datetime', {
         method: 'PUT',
+        cache: 'no-store',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache'
         },
         body: JSON.stringify({
           userId,

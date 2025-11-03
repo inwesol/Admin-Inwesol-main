@@ -3,6 +3,10 @@ import { db } from '@/lib/db/connection';
 import { coaches, userSessionFormProgress } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 
+// Force dynamic rendering to prevent caching
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function PUT(request: NextRequest) {
   let userId: string | undefined;
   let coachId: string | null | undefined;
@@ -15,13 +19,17 @@ export async function PUT(request: NextRequest) {
     console.log('Coach assignment request:', { userId, coachId });
 
     if (!userId) {
-      return NextResponse.json(
+      const errorResponse = NextResponse.json(
         {
           success: false,
           error: 'User ID is required',
         },
         { status: 400 }
       );
+      errorResponse.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      errorResponse.headers.set('Pragma', 'no-cache');
+      errorResponse.headers.set('Expires', '0');
+      return errorResponse;
     }
 
     // First, let's test basic database connectivity
@@ -98,10 +106,17 @@ export async function PUT(request: NextRequest) {
           );
       }
 
-      return NextResponse.json({
-        success: true,
-        message: 'Coach unassigned successfully',
-      });
+    const response = NextResponse.json({
+      success: true,
+      message: 'Coach unassigned successfully',
+    });
+    
+    // Set cache control headers to prevent caching
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+    
+    return response;
     }
 
     // Get coach details including session_links
@@ -118,13 +133,17 @@ export async function PUT(request: NextRequest) {
       .limit(1);
 
     if (coach.length === 0) {
-      return NextResponse.json(
+      const errorResponse = NextResponse.json(
         {
           success: false,
           error: 'Coach not found',
         },
         { status: 404 }
       );
+      errorResponse.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      errorResponse.headers.set('Pragma', 'no-cache');
+      errorResponse.headers.set('Expires', '0');
+      return errorResponse;
     }
 
     const coachData = coach[0];
@@ -145,13 +164,17 @@ export async function PUT(request: NextRequest) {
       .limit(1);
 
     if (currentForm.length === 0) {
-      return NextResponse.json(
+      const errorResponse = NextResponse.json(
         {
           success: false,
           error: 'No pending schedule-call form found for this user',
         },
         { status: 404 }
       );
+      errorResponse.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      errorResponse.headers.set('Pragma', 'no-cache');
+      errorResponse.headers.set('Expires', '0');
+      return errorResponse;
     }
 
     const currentInsights = (currentForm[0].insights as any) || {};
@@ -220,7 +243,7 @@ export async function PUT(request: NextRequest) {
       )
       .returning();
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       data: {
         coach: {
@@ -232,6 +255,13 @@ export async function PUT(request: NextRequest) {
         formStatus: 'assigned'
       },
     });
+    
+    // Set cache control headers to prevent caching
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+    
+    return response;
   } catch (error) {
     console.error('Error assigning coach:', error);
     console.error('Error details:', {
@@ -240,7 +270,7 @@ export async function PUT(request: NextRequest) {
       userId,
       coachId
     });
-    return NextResponse.json(
+    const errorResponse = NextResponse.json(
       {
         success: false,
         error: 'Failed to assign coach',
@@ -248,5 +278,12 @@ export async function PUT(request: NextRequest) {
       },
       { status: 500 }
     );
+    
+    // Set cache control headers to prevent caching
+    errorResponse.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    errorResponse.headers.set('Pragma', 'no-cache');
+    errorResponse.headers.set('Expires', '0');
+    
+    return errorResponse;
   }
 }

@@ -21,7 +21,12 @@ const ClientsPage: React.FC = () => {
 
   const fetchJourneyClients = async () => {
     try {
-      const response = await fetch('/api/clients/journey')
+      const response = await fetch('/api/clients/journey', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      })
       const data = await response.json()
 
       if (data.success) {
@@ -37,7 +42,12 @@ const ClientsPage: React.FC = () => {
 
   const fetchAllClients = async () => {
     try {
-      const response = await fetch('/api/clients')
+      const response = await fetch('/api/clients', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      })
       const data = await response.json()
 
       if (data.success) {
@@ -53,7 +63,12 @@ const ClientsPage: React.FC = () => {
 
   const fetchCoaches = async () => {
     try {
-      const response = await fetch('/api/coaches')
+      const response = await fetch('/api/coaches', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      })
       const data = await response.json()
 
       if (data.success) {

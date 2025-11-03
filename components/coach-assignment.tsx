@@ -49,8 +49,10 @@ export function CoachAssignment({
     try {
       const response = await fetch('/api/clients/assign-coach', {
         method: 'PUT',
+        cache: 'no-store',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache'
         },
         body: JSON.stringify({
           userId,
