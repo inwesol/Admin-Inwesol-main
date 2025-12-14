@@ -9,7 +9,8 @@ import {
   LucideIcon,
   Users,
   ShieldUser,
-  UserCog
+  UserCog,
+  Calendar
 } from 'lucide-react'
 
 import { NavProjects } from '@/components/nav-projects'
@@ -47,15 +48,20 @@ const data: {
       icon: ShieldUser
     },
     {
-      name: 'Partners',
-      url: '/partners',
-      icon: UserCog
-    },
-    {
-      name: 'Coach-Dashboard',
-      url: '/coach-dashboard',
-      icon: Frame
+      name: 'Scheduler',
+      url: '/coaches/scheduler',
+      icon: Calendar
     }
+    // {
+    //   name: 'Partners',
+    //   url: '/partners',
+    //   icon: UserCog
+    // },
+    // {
+    //   name: 'Coach-Dashboard',
+    //   url: '/coach-dashboard',
+    //   icon: Frame
+    // }
   ]
 }
 

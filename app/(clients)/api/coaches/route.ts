@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
       id: coaches.id,
       name: coaches.name,
       email: coaches.email,
+      clients: coaches.clients,
     }).from(coaches).orderBy(desc(coaches.createdAt));
 
     const response = NextResponse.json({
