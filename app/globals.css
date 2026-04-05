@@ -82,3 +82,46 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* FullCalendar v6 — dark mode (CDN styles default to light; map FC vars to app tokens) */
+.dark .fc {
+  --fc-page-bg-color: hsl(var(--card));
+  --fc-neutral-bg-color: hsl(var(--muted) / 0.45);
+  --fc-neutral-text-color: hsl(var(--muted-foreground));
+  --fc-border-color: hsl(var(--border));
+
+  --fc-button-text-color: hsl(var(--primary-foreground));
+  --fc-button-bg-color: hsl(var(--primary));
+  --fc-button-border-color: hsl(var(--primary));
+  --fc-button-hover-bg-color: hsl(var(--primary) / 0.88);
+  --fc-button-hover-border-color: hsl(var(--primary));
+  --fc-button-active-bg-color: hsl(var(--primary) / 0.75);
+  --fc-button-active-border-color: hsl(var(--primary));
+
+  --fc-event-bg-color: hsl(var(--chart-1));
+  --fc-event-border-color: hsl(var(--chart-1));
+  --fc-event-text-color: hsl(0 0% 100%);
+  --fc-event-selected-overlay-color: rgb(255 255 255 / 12%);
+
+  --fc-more-link-bg-color: hsl(var(--muted));
+  --fc-more-link-text-color: hsl(var(--foreground));
+
+  --fc-non-business-color: hsl(var(--muted) / 0.35);
+  --fc-bg-event-color: hsl(142 45% 38%);
+  --fc-bg-event-opacity: 0.22;
+  --fc-highlight-color: hsl(var(--primary) / 0.16);
+  --fc-today-bg-color: hsl(45 93% 47% / 0.14);
+  --fc-now-indicator-color: hsl(var(--destructive));
+}
+
+.dark .fc .fc-col-header-cell-cushion,
+.dark .fc .fc-daygrid-day-number,
+.dark .fc .fc-timegrid-axis-cushion,
+.dark .fc .fc-timegrid-slot-label-cushion {
+  color: hsl(var(--card-foreground));
+}
+
+.dark .fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+  color: hsl(var(--foreground));
+  font-weight: 600;
+}

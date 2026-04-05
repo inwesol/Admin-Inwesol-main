@@ -108,11 +108,13 @@ export const createColumns = (
       }
 
       return (
-        <EditableSessionDatetime
-          userId={userId}
-          initialValue={sessionDatetime}
-          onUpdate={newValue => onUpdate(userId, newValue)}
-        />
+        <div onClick={e => e.stopPropagation()}>
+          <EditableSessionDatetime
+            userId={userId}
+            initialValue={sessionDatetime}
+            onUpdate={newValue => onUpdate(userId, newValue)}
+          />
+        </div>
       )
     }
   },
@@ -135,6 +137,9 @@ export const createColumns = (
           }}
         />
       )
+    },
+    meta: {
+      stopRowClick: true
     }
   },
   {

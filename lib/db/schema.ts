@@ -53,3 +53,27 @@ export const coaches = pgTable('coaches', {
 }, (table) => [
   unique('coaches_email_key').on(table.email),
 ]);
+
+// Demographics details form table schema
+export const demographicsDetailsForm = pgTable(
+  "demographics_details_form",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    user_id: uuid("user_id").notNull(),
+    full_name: varchar("full_name", { length: 100 }),
+    email: varchar("email", { length: 100 }),
+    phone_number: varchar("phone_number", { length: 20 }),
+    age: integer("age"),
+    gender: varchar("gender", { length: 30 }),
+    profession: varchar("profession", { length: 50 }),
+    previous_coaching: varchar("previous_coaching", { length: 20 }),
+    education: varchar("education", { length: 100 }),
+    stress_level: integer("stress_level"),
+    motivation: varchar("motivation", { length: 500 }),
+    created_at: timestamp("created_at").defaultNow().notNull(),
+    updated_at: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    unique().on(table.user_id), // <-- enforces unique user_id constraint
+  ]
+);

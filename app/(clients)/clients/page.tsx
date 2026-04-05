@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { DataTable } from './data-table'
 import { createColumns, Client } from './columns'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -12,6 +13,7 @@ interface Coach {
 }
 
 const ClientsPage: React.FC = () => {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState('journey')
   const [journeyClients, setJourneyClients] = useState<Client[]>([])
   const [allClients, setAllClients] = useState<Client[]>([])
@@ -116,6 +118,13 @@ const ClientsPage: React.FC = () => {
     fetchData()
   }, [])
 
+  const handleClientRowClick = useCallback(
+    (client: Client) => {
+      router.push(`/clients/${client.id}`)
+    },
+    [router]
+  )
+
   if (loading) {
     return (
       <div className='container mx-auto py-10'>
@@ -164,6 +173,7 @@ const ClientsPage: React.FC = () => {
               handleCoachAssignment
             )}
             data={journeyClients}
+            onRowClick={handleClientRowClick}
           />
         </TabsContent>
 
@@ -176,6 +186,7 @@ const ClientsPage: React.FC = () => {
               handleCoachAssignment
             )}
             data={allClients}
+            onRowClick={handleClientRowClick}
           />
         </TabsContent>
       </Tabs>

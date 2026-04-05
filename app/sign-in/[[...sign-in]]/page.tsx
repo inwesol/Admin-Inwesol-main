@@ -4,6 +4,7 @@ import { SignIn } from '@clerk/nextjs'
 import { useUser } from '@clerk/nextjs'
 import { useState, useEffect } from 'react'
 import type { FC } from 'react'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 const LoginPage: FC = () => {
   const { isLoaded } = useUser()
@@ -16,10 +17,13 @@ const LoginPage: FC = () => {
   }, [isLoaded])
 
   return (
-    <div className='flex min-h-screen'>
+    <div className='relative flex min-h-screen'>
+      <div className='absolute right-4 top-4 z-50'>
+        <ThemeToggle />
+      </div>
       {/* Left side - Illustration */}
-      <div className='relative flex w-1/2 flex-col items-center justify-center overflow-hidden bg-white p-12'>
-        <div className='absolute inset-0 bg-white' />
+      <div className='relative flex w-1/2 flex-col items-center justify-center overflow-hidden bg-muted p-12'>
+        <div className='absolute inset-0 bg-muted' />
 
         {/* Storyset Illustration */}
         <div className='relative z-10 mb-8 w-full max-w-md'>
@@ -37,13 +41,13 @@ const LoginPage: FC = () => {
       </div>
 
       {/* Right side - Login Form */}
-      <div className='flex w-1/2 items-center justify-center bg-white p-12'>
+      <div className='flex w-1/2 items-center justify-center bg-background p-12'>
         <div className='w-full max-w-sm'>
           <div className='mb-8 text-center'>
-            <h2 className='mb-3 text-3xl font-bold text-gray-900'>
+            <h2 className='mb-3 text-3xl font-bold text-foreground'>
               Admin Login
             </h2>
-            <p className='text-lg text-gray-600'>
+            <p className='text-lg text-muted-foreground'>
               Enter your provided credentials
             </p>
           </div>
@@ -52,12 +56,12 @@ const LoginPage: FC = () => {
           {showPlaceholder && (
             <div className='animate-pulse space-y-4'>
               <div className='space-y-2'>
-                <div className='h-4 w-24 rounded bg-gray-200' />
-                <div className='h-10 rounded bg-gray-200' />
+                <div className='h-4 w-24 rounded bg-muted' />
+                <div className='h-10 rounded bg-muted' />
               </div>
               <div className='space-y-2'>
-                <div className='h-4 w-20 rounded bg-gray-200' />
-                <div className='h-10 rounded bg-gray-200' />
+                <div className='h-4 w-20 rounded bg-muted' />
+                <div className='h-10 rounded bg-muted' />
               </div>
               <div className='h-10 rounded bg-[#00B24B]' />
             </div>

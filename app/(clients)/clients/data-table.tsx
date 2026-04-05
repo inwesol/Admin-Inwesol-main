@@ -35,11 +35,13 @@ import {
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  onRowClick?: (row: TData) => void
 }
 
 export function DataTable<TData, TValue>({
   columns,
-  data
+  data,
+  onRowClick
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -138,9 +140,23 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
+                  className={
+                    onRowClick ? 'cursor-pointer hover:bg-muted/50' : undefined
+                  }
+                  onClick={
+                    onRowClick ? () => onRowClick(row.original) : undefined
+                  }
                 >
                   {row.getVisibleCells().map(cell => (
-                    <TableCell key={cell.id}>
+                    <TableCell
+                      key={cell.id}
+                      onClick={
+                        (cell.column.columnDef.meta as { stopRowClick?: boolean })
+                          ?.stopRowClick
+                          ? e => e.stopPropagation()
+                          : undefined
+                      }
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

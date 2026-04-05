@@ -14,13 +14,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { ThemeMenuRadioGroup } from '@/components/theme-menu-items'
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { ChevronsUpDown, LogOut, Settings, User } from "lucide-react"
+import { ChevronsUpDown, LogOut, Settings } from "lucide-react"
 
 export function NavUser() {
   const { user } = useUser()
@@ -81,6 +82,8 @@ export function NavUser() {
                 </div>
               </div>
             </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <ThemeMenuRadioGroup />
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSettingsClick} className="cursor-pointer">
               <Settings className="mr-2 h-4 w-4" />

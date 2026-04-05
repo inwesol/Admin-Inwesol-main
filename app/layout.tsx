@@ -4,6 +4,7 @@ import './globals.css'
 import { ClerkProvider } from '@clerk/nextjs'
 import { ConditionalLayout } from '@/components/conditional-layout'
 import { FullCalendarStyles } from '@/components/fullcalendar-styles'
+import { ThemeProvider } from '@/components/theme-provider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -21,10 +22,17 @@ export default function RootLayout({
     <ClerkProvider
       publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
     >
-      <html lang='en'>
+      <html lang='en' suppressHydrationWarning>
         <body className={inter.className}>
-          <FullCalendarStyles />
-          <ConditionalLayout>{children}</ConditionalLayout>
+          <ThemeProvider
+            attribute='class'
+            defaultTheme='system'
+            enableSystem
+            disableTransitionOnChange
+          >
+            <FullCalendarStyles />
+            <ConditionalLayout>{children}</ConditionalLayout>
+          </ThemeProvider>
         </body>
       </html>
     </ClerkProvider>
