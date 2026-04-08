@@ -168,3 +168,58 @@ export async function GET(
     return errorResponse
   }
 }
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: userId } = await params
+    const body = await request.json()
+    const { paymentDone } = body as { paymentDone?: unknown }
+
+    if (typeof paymentDone !== 'boolean') {
+      return NextResponse.json(
+        { success: false, error: 'paymentDone must be a boolean' },
+        { status: 400 }
+      )
+    }
+
+    const existing = await db
+      .select({ id: journeyProgress.id })
+      .from(journeyProgress)
+      .where(eq(journeyProgress.userId, userId))
+      .limit(1)
+
+    if (!existing.length) {
+      return NextResponse.json(
+        { success: false, error: 'Journey progress not found for this client' },
+        { status: 404 }
+      )
+    }
+
+    const updated = await db
+      .update(journeyProgress)
+      .set({
+        paymentDone,
+        updatedAt: new Date().toISOString()
+      })
+      .where(eq(journeyProgress.userId, userId))
+      .returning({
+        id: journeyProgress.id,
+        paymentDone: journeyProgress.paymentDone,
+        updatedAt: journeyProgress.updatedAt
+      })
+
+    return NextResponse.json({
+      success: true,
+      data: updated[0]
+    })
+  } catch (error) {
+    console.error('Error updating client payment status:', error)
+    return NextResponse.json(
+      { success: false, error: 'Failed to update payment status' },
+      { status: 500 }
+    )
+  }
+}

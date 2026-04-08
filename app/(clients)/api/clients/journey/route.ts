@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
         sessionId: userSessionFormProgress.sessionId,
         createdAt: users.createdAt,
         currentSession: journeyProgress.currentSession,
-        totalScore: journeyProgress.totalScore,
+        paymentDone: journeyProgress.paymentDone,
         lastActiveDate: journeyProgress.lastActiveDate,
         hasPendingScheduleCall: sql<boolean>`CASE WHEN ${userSessionFormProgress.formId} = 'schedule-call' AND ${userSessionFormProgress.status} = 'pending' THEN true ELSE false END`,
         sessionDatetime: sql<string | null>`CASE WHEN ${userSessionFormProgress.formId} = 'schedule-call' AND ${userSessionFormProgress.status} = 'pending' THEN ${userSessionFormProgress.insights}->>'session_datetime' ELSE NULL END`,

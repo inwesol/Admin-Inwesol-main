@@ -2,7 +2,14 @@
 
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, ExternalLink, Mail, User } from 'lucide-react'
+import {
+  ArrowLeft,
+  CheckCircle2,
+  ExternalLink,
+  Mail,
+  User,
+  XCircle
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -36,6 +43,7 @@ interface JourneyProgressDetail {
   userId: string
   currentSession: number
   completedSessions: unknown
+  paymentDone: boolean
   lastActiveDate: string
   createdAt: string
   updatedAt: string
@@ -127,6 +135,10 @@ const ClientDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [clientId, setClientId] = useState<string | null>(null)
+  const [isUpdatingPayment, setIsUpdatingPayment] = useState(false)
+  const [paymentUpdateError, setPaymentUpdateError] = useState<string | null>(
+    null
+  )
 
   useEffect(() => {
     const resolveParams = async () => {
@@ -213,6 +225,59 @@ const ClientDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({
     sessionFormProgress
   } = detail
   const loginUrls = getClientCoachLoginUrls()
+
+  const handleTogglePaymentDone = async () => {
+    if (!clientId || !detail?.journeyProgress || isUpdatingPayment) return
+
+    const previousValue = detail.journeyProgress.paymentDone
+    const nextValue = !previousValue
+
+    setPaymentUpdateError(null)
+    setIsUpdatingPayment(true)
+    setDetail(prev =>
+      prev?.journeyProgress
+        ? {
+            ...prev,
+            journeyProgress: {
+              ...prev.journeyProgress,
+              paymentDone: nextValue
+            }
+          }
+        : prev
+    )
+
+    try {
+      const response = await fetch(`/api/clients/${clientId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ paymentDone: nextValue })
+      })
+      const data = await response.json()
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to update payment status')
+      }
+    } catch (err) {
+      setDetail(prev =>
+        prev?.journeyProgress
+          ? {
+              ...prev,
+              journeyProgress: {
+                ...prev.journeyProgress,
+                paymentDone: previousValue
+              }
+            }
+          : prev
+      )
+      setPaymentUpdateError(
+        'Failed to update payment status. Please try again.'
+      )
+      console.error('Error updating payment status:', err)
+    } finally {
+      setIsUpdatingPayment(false)
+    }
+  }
 
   return (
     <div className='container mx-auto py-10'>
@@ -448,6 +513,32 @@ const ClientDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({
                 </p>
               </div>
               <div>
+                <span className='text-muted-foreground'>Payment status</span>
+                <div className='mt-1'>
+                  <Button
+                    type='button'
+                    variant='outline'
+                    size='sm'
+                    onClick={handleTogglePaymentDone}
+                    disabled={isUpdatingPayment}
+                    className={`h-8 gap-1.5 ${
+                      journeyProgress.paymentDone
+                        ? 'border-green-600 text-green-600 hover:border-green-600 hover:bg-green-300/20 hover:text-green-600'
+                        : 'border-red-600 text-red-600 hover:border-red-700 hover:bg-red-300/20 hover:text-red-600'
+                    }`}
+                  >
+                    {journeyProgress.paymentDone ? (
+                      <CheckCircle2 className='h-4 w-4 text-green-600' />
+                    ) : (
+                      <XCircle className='h-4 w-4 text-red-600' />
+                    )}
+                    <span>
+                      {journeyProgress.paymentDone ? 'Done' : 'Pending'}
+                    </span>
+                  </Button>
+                </div>
+              </div>
+              <div>
                 <span className='text-muted-foreground'>Last active</span>
                 <p className='font-medium'>{journeyProgress.lastActiveDate}</p>
               </div>
@@ -456,6 +547,9 @@ const ClientDetailPage: React.FC<{ params: Promise<{ id: string }> }> = ({
             <p className='text-sm text-muted-foreground'>
               No journey progress record for this user yet.
             </p>
+          )}
+          {paymentUpdateError && (
+            <p className='mt-3 text-sm text-red-500'>{paymentUpdateError}</p>
           )}
         </CardContent>
       </Card>

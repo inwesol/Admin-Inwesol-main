@@ -394,7 +394,7 @@ export const journeyProgress = pgTable("journey_progress", {
 	userId: uuid("user_id").notNull(),
 	currentSession: integer("current_session").notNull(),
 	completedSessions: json("completed_sessions").notNull(),
-	totalScore: integer("total_score").notNull(),
+	paymentDone: boolean("payment_done").default(false).notNull(),
 	lastActiveDate: varchar("last_active_date", { length: 32 }).notNull(),
 	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),

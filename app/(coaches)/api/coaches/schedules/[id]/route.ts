@@ -95,7 +95,7 @@ export async function PUT(
 
 // Delete session
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -119,23 +119,9 @@ export async function DELETE(
       )
     }
 
-    // Remove session_datetime from insights instead of deleting the entire record
-    const existingFormFull = await db
-      .select({ insights: userSessionFormProgress.insights })
-      .from(userSessionFormProgress)
-      .where(eq(userSessionFormProgress.id, scheduleId))
-      .limit(1)
-
-    const existingInsights = existingFormFull[0].insights || {}
-    const { session_datetime, ...updatedInsights } = existingInsights as any
-
-    // Update the insights field to remove session_datetime
+    // Delete the entire schedule row
     await db
-      .update(userSessionFormProgress)
-      .set({
-        insights: updatedInsights,
-        updatedAt: new Date().toISOString(),
-      })
+      .delete(userSessionFormProgress)
       .where(eq(userSessionFormProgress.id, scheduleId))
 
     const response = NextResponse.json({
